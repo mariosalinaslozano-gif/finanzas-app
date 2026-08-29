@@ -1,6 +1,9 @@
 from flask import Flask
+from models import db, Cuenta, Categoria, Transaccion
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finanzas.db"
+db.init_app(app)
 
 @app.route("/")
 def inicio():
