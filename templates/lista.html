@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Transacciones</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th><th>Tipo</th><th>Monto</th>
+            <th>Cuenta</th><th>Categoría</th><th>Nota</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in transacciones %}
+        <tr>
+            <td>{{ t.fecha }}</td>
+            <td>{{ t.tipo }}</td>
+            <td>{{ t.monto }}</td>
+            <td>{{ t.cuenta.nombre if t.cuenta else "-" }}</td>
+            <td>{{ t.categoria.nombre if t.categoria else "-" }}</td>
+            <td>{{ t.nota }}</td>
+            <td>
+                <a href="/transacciones/{{ t.id }}/editar">Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not transacciones %}
+<p>Todavía no hay transacciones. <a href="/transacciones/nueva">Agrega la primera</a>.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Finanzas</title>
+    <!-- Pico.css: estilo bonito sin escribir CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Mis Finanzas</h1>
+        <nav>
+            <a href="/transacciones">Ver transacciones</a> |
+            <a href="/transacciones/nueva">Agregar transacción</a>
+        </nav>
+        <hr>
+        {% block contenido %}{% endblock %}
+    </main>
+</body>
+</html>

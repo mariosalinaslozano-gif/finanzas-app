@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Editar transacción</h2>
+
+<form method="POST">
+    <label>Fecha
+        <input type="date" name="fecha" value="{{ t.fecha }}" required>
+    </label>
+
+    <label>Tipo
+        <select name="tipo" required>
+            <option value="entrada" {% if t.tipo == "entrada" %}selected{% endif %}>Entrada</option>
+            <option value="salida" {% if t.tipo == "salida" %}selected{% endif %}>Salida</option>
+            <option value="transferencia" {% if t.tipo == "transferencia" %}selected{% endif %}>Transferencia</option>
+        </select>
+    </label>
+
+    <label>Monto
+        <input type="number" step="0.01" name="monto" value="{{ t.monto }}" required>
+    </label>
+
+    <label>Cuenta
+        <select name="cuenta_id" required>
+            {% for c in cuentas %}
+            <option value="{{ c.id }}" {% if c.id == t.cuenta_id %}selected{% endif %}>{{ c.nombre }} ({{ c.moneda }})</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>Categoría
+        <select name="categoria_id">
+            {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if cat.id == t.categoria_id %}selected{% endif %}>{{ cat.nombre }}</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>Nota
+        <input type="text" name="nota" value="{{ t.nota }}">
+    </label>
+
+    <button type="submit">Guardar cambios</button>
+</form>
+
+<!-- Botón de borrar (ver Paso 5) -->
+<form method="POST" action="/transacciones/{{ t.id }}/borrar">
+    <button type="submit" class="secondary">Borrar</button>
+</form>
+{% endblock %}

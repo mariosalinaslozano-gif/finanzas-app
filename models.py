@@ -34,5 +34,9 @@ class Transaccion(db.Model):
     cuenta_id = db.Column(db.Integer, db.ForeignKey("cuenta.id"))
     categoria_id = db.Column(db.Integer, db.ForeignKey("categoria.id"))
 
+    # Para que las listas del html funcionen 
+    cuenta = db.relationship("Cuenta")
+    categoria = db.relationship("Categoria")
+
     def __repr__(self):
         return f"<Transaccion {self.id} {self.tipo} {self.monto}>"
