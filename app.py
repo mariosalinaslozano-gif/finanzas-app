@@ -1,16 +1,53 @@
 from flask import Flask, render_template, request, redirect, url_for
 from models import db, Cuenta, Categoria, Transaccion
 from datetime import datetime
+from sqlalchemy import func
 
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finanzas.db"
 db.init_app(app)
 
+def calcular_saldo(cuenta):
+    entradas = db.session.query(func.sum(Transaccion.monto)) \
+            .filter_by(cuenta_id = cuenta.id, tipo="entrada").scalar() or 0
+    salidas = db.session.query(func.sum(Transaccion.monto)) \
+            .filter_by(cuenta_id = cuenta.id, tipo="salida").scalar() or 0
+    return cuenta.saldo_inicial + entradas - salidas
+
 @app.route("/")
 def inicio():
-    transacciones = Transaccion.query.order_by(Transaccion.fecha.desc()).all()
-    return render_template("lista.html", transacciones=transacciones)
+    cuentas = Cuenta.query.all()
+    # build a list of (account, its balance) pairs
+    saldos = [(c, calcular_saldo(c)) for c in cuentas]
+
+    # totals grouped by currency
+    totales_por_moneda = {}
+    for cuenta, saldo in saldos:
+        totales_por_moneda[cuenta.moneda] = totales_por_moneda.get(cuenta.moneda, 0) + saldo
+
+    return render_template("dashboard.html",
+                           saldos=saldos,
+                           totales=totales_por_moneda)
+
+
+@app.route("/resumen")
+def resumen():
+    # sum of expenses grouped by category name
+    filas = db.session.query(
+                Categoria.nombre,
+                func.sum(Transaccion.monto)
+            ).join(Transaccion, Transaccion.categoria_id == Categoria.id) \
+             .filter(Transaccion.tipo == "salida") \
+             .group_by(Categoria.nombre).all()
+
+    etiquetas = [nombre for nombre, total in filas]   # ["Comida", "Renta"]
+    valores = [float(total) for nombre, total in filas]  # [450.0, 8000.0]
+
+    return render_template("resumen.html", 
+                           filas=filas,
+                           etiquetas=etiquetas,
+                           valores=valores)
 
 @app.route("/transacciones")
 def lista_transacciones():

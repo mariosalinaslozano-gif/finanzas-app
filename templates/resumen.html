@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Spending by category</h2>
+
+<table>
+    <thead>
+        <tr><th>Category</th><th>Total spent</th></tr>
+    </thead>
+    <tbody>
+        {% for nombre, total in filas %}
+        <tr>
+            <td>{{ nombre }}</td>
+            <td>{{ "%.2f"|format(total) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not filas %}
+<p>No expenses yet.</p>
+{% endif %}
+
+<h3>Chart</h3>
+<canvas id="grafica"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+        const ctx = document.getElementById("grafica");
+        new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: {{ etiquetas|tojson }},
+                datasets: [{
+                    data: {{ valores|tojson }}
+                }]
+            }
+    });
+</script>
+{% endblock %}

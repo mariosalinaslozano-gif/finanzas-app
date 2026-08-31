@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Dashboard</h2>
+
+<h3>Balance by account</h3>
+<table>
+    <thead>
+        <tr><th>Account</th><th>Currency</th><th>Balance</th></tr>
+    </thead>
+    <tbody>
+        {% for cuenta, saldo in saldos %}
+        <tr>
+            <td>{{ cuenta.nombre }}</td>
+            <td>{{ cuenta.moneda }}</td>
+            <td>{{ "%.2f"|format(saldo) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Total by currency</h3>
+<ul>
+    {% for moneda, total in totales.items() %}
+    <li><strong>{{ moneda }}:</strong> {{ "%.2f"|format(total) }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
