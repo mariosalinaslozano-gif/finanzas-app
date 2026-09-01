@@ -1,6 +1,37 @@
 {% extends "base.html" %}
 
 {% block contenido %}
+
+<form method="GET" action="/transacciones">
+    <div class="grid">
+        <select name="tipo">
+            <option value="">All types</option>
+            <option value="entrada">Income</option>
+            <option value="salida">Expense</option>
+            <option value="transferencia">Transfer</option>
+        </select>
+
+        <select name="cuenta_id">
+            <option value="">All accounts</option>
+            {% for c in cuentas %}
+            <option value="{{ c.id }}">{{ c.nombre }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="categoria_id">
+            <option value="">All categories</option>
+            {% for cat in categorias %}
+            <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+            {% endfor %}
+        </select>
+
+        <label>From <input type="date" name="desde"></label>
+        <label>To <input type="date" name="hasta"></label>
+
+        <button type="submit">Filter</button>
+    </div>
+</form>
+
 <h2>Transacciones</h2>
 
 <table>
@@ -14,8 +45,15 @@
         {% for t in transacciones %}
         <tr>
             <td>{{ t.fecha }}</td>
-            <td>{{ t.tipo }}</td>
-            <td>{{ t.monto }}</td>
+            <td>
+                {% if t.tipo == "entrada" %}
+                <span style="color: green;">+{{ "%.2f"|format(t.monto) }}</span>
+            {% elif t.tipo == "salida" %}
+                <span style="color: crimson;">-{{ "%.2f"|format(t.monto) }}</span>
+            {% else %}
+                {{ "%.2f"|format(t.monto) }}
+            {% endif %} 
+            </td>
             <td>{{ t.cuenta.nombre if t.cuenta else "-" }}</td>
             <td>{{ t.categoria.nombre if t.categoria else "-" }}</td>
             <td>{{ t.nota }}</td>

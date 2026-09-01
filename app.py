@@ -51,17 +51,66 @@ def resumen():
 
 @app.route("/transacciones")
 def lista_transacciones():
-    transacciones = Transaccion.query.order_by(Transaccion.fecha.desc()).all()
-    return render_template("lista.html", transacciones=transacciones)
+
+    #Start with query that we can add conditions to
+    consulta = Transaccion.query
+
+    tipo = request.args.get("tipo")
+    cuenta_id = request.args.get("cuenta_id")
+    categoria_id = request.args.get("categoria_id")
+    desde = request.args.get("desde")
+    hasta = request.args.get("hasta")
+
+    if tipo:
+        consulta = consulta.filter_by(tipo=tipo)
+    if cuenta_id:
+        consulta = consulta.filter_by(cuenta_id=int(cuenta_id))
+    if categoria_id:
+        consulta = consulta.filter_by(categoria_id=int(categoria_id))
+    if desde:
+        consulta = consulta.filter(Transaccion.fecha >= datetime.strptime(desde, "%Y-%m-%d").date())
+    if hasta:
+        consulta = consulta.filter(Transaccion.fecha <= datetime.strptime(hasta, "%Y-%m-%d").date())
+        
+    transacciones = consulta.order_by(Transaccion.fecha.desc()).all()
+
+    cuentas = Cuenta.query.all()
+    categorias = Categoria.query.all()
+
+    return render_template("lista.html", 
+                           transacciones=transacciones,
+                           cuentas=cuentas,
+                           categorias=categorias)
 
 @app.route("/transacciones/nueva", methods=["GET", "POST"])
 def nueva_transaccion():
     if request.method == "POST":
-        # El usuario llenó el formulario y le dio Guardar
+    # basic validation
+        errores = []
+
+        try:
+            monto = float(request.form["monto"])
+            if monto <= 0:
+                errores.append("Amount must be greater than 0.")
+        except ValueError:
+            errores.append("Amount must be a number.")
+
+        if not request.form.get("cuenta_id"):
+            errores.append("You must choose an account.")
+
+        if errores:
+            # re-show the form with the error messages
+            cuentas = Cuenta.query.all()
+            categorias = Categoria.query.all()
+            return render_template("formulario.html",
+                                cuentas=cuentas, categorias=categorias,
+                                errores=errores)
+
+        # if we get here, input is valid → save
         t = Transaccion(
             fecha=datetime.strptime(request.form["fecha"], "%Y-%m-%d").date(),
             tipo=request.form["tipo"],
-            monto=float(request.form["monto"]),
+            monto=monto,
             cuenta_id=int(request.form["cuenta_id"]),
             categoria_id=int(request.form["categoria_id"]) if request.form["categoria_id"] else None,
             nota=request.form["nota"],
