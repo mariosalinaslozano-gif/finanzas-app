@@ -13,7 +13,9 @@ url = os.environ.get("DATABASE_URL", "sqlite:///finanzas.db")
 if url.startswith("postgres://"):
     url = url.replace("postgres://", "postgresql://", 1)
 
+app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = url
+db.init_app(app)
 
 CODIGOS_CUENTA = {
     "deb-us":  "Debito EE.UU.",
