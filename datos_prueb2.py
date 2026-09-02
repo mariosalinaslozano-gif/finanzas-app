@@ -2,24 +2,38 @@ from app import app, db
 from models import Cuenta, Categoria, Transaccion
 
 with app.app_context():
-    # make sure the tables exist (safe to run even if they already do)
-    db.create_all()
+    db.create_all()   # make sure the tables exist (safe to run anytime)
 
-    # avoid creating duplicates if you run this script more than once
     if Cuenta.query.first():
         print("Accounts already exist. Skipping.")
     else:
-        debito_mx   = Cuenta(nombre="Debito MXN",    saldo_inicial=0, moneda="MXN")
-        credito_mx  = Cuenta(nombre="Credito MXN",   saldo_inicial=0, moneda="MXN")
-        debito_usa  = Cuenta(nombre="Debito EE.UU.", saldo_inicial=0, moneda="USD")
-        credito_usa = Cuenta(nombre="Credito EE.UU.", saldo_inicial=0, moneda="USD")
+        # ============================================================
+        # EDIT HERE 1 — YOUR ACCOUNTS
+        # Pattern: variable = Cuenta(nombre="Name", saldo_inicial=0, moneda="USD" or "MXN")
+        # If you rename an account, also update CODIGOS_CUENTA in app.py
+        # ============================================================
+        cuentas = [
+            Cuenta(nombre="Debito EE.UU.",  saldo_inicial=0, moneda="USD"),
+            Cuenta(nombre="Credito EE.UU.", saldo_inicial=0, moneda="USD"),
+            Cuenta(nombre="Debito MXN",     saldo_inicial=0, moneda="MXN"),
+            Cuenta(nombre="Credito MXN",    saldo_inicial=0, moneda="MXN"),
+        ]
 
-        # a couple of categories too, so your dropdowns aren't empty
-        comida = Categoria(nombre="Comida", tipo="gasto")
-        sueldo = Categoria(nombre="Sueldo", tipo="ingreso")
-        renta  = Categoria(nombre="Renta",  tipo="gasto")
+        # ============================================================
+        # EDIT HERE 2 — YOUR CATEGORIES
+        # Pattern: Categoria(nombre="Name", tipo="gasto" or "ingreso")
+        # "gasto" = expense, "ingreso" = income
+        # ============================================================
+        categorias = [
+            Categoria(nombre="Comida",        tipo="gasto"),
+            Categoria(nombre="Renta",         tipo="gasto"),
+            Categoria(nombre="Suscripciones", tipo="gasto"),
+            Categoria(nombre="otro",          tipo="gasto"),
+            Categoria(nombre="Sueldo",        tipo="ingreso"),
+            Categoria(nombre="Transferencia",       tipo="ingreso"),
+        ]
 
-        db.session.add_all([debito_mx, credito_mx, debito_usa, credito_usa,
-                            comida, sueldo, renta])
+        # This saves everything — no need to touch it
+        db.session.add_all(cuentas + categorias)
         db.session.commit()
-        print("Accounts and categories created!")
+        print(f"{len(cuentas)} accounts and {len(categorias)} categories created!")
