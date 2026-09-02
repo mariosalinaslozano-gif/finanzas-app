@@ -1,14 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for
 from models import db, Cuenta, Categoria, Transaccion
-from datetime import datetime
+from datetime import datetime, date 
 from sqlalchemy import func
 import csv
 import io
 
-
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finanzas.db"
 db.init_app(app)
+
+CODIGOS_CUENTA = {
+    "deb-us":  "Debito EE.UU.",
+    "cred-us": "Credito EE.UU.",
+    "deb-mx":  "Debito MXN",
+    "cred-mx": "Credito MXN",
+}
 
 def calcular_saldo(cuenta):
     entradas = db.session.query(func.sum(Transaccion.monto)) \
@@ -193,6 +199,66 @@ def importar():
                                resultado=f"{creadas} imported, {errores} skipped.")
 
     return render_template("importar.html")
+
+@app.route("/captura", methods=["GET", "POST"])
+def captura():
+    if request.method == "POST":
+        texto = request.form.get("lineas", "")
+        creadas = 0
+        fallidas = []   # lines we couldn't process
+
+        for linea in texto.strip().split("\n"):
+            linea = linea.strip()
+            if not linea:
+                continue   # skip empty lines
+
+            partes = [p.strip() for p in linea.split(",")]
+
+            # we need at least tipo, cuenta, monto
+            if len(partes) < 3:
+                fallidas.append(linea)
+                continue
+
+            tipo = partes[0].lower()
+            codigo = partes[1].lower()
+            monto_texto = partes[2]
+            nota = partes[3] if len(partes) > 3 else ""
+
+            nombre_cuenta = CODIGOS_CUENTA.get(codigo)
+            if nombre_cuenta is None:
+                fallidas.append(linea)          # unknown code
+                continue
+
+            # find the account by name
+            cuenta = Cuenta.query.filter_by(nombre=nombre_cuenta).first()
+
+            try:
+                monto = float(monto_texto)
+            except ValueError:
+                fallidas.append(linea)
+                continue
+
+            if not cuenta or tipo not in ("entrada", "salida", "transferencia") or monto <= 0:
+                fallidas.append(linea)
+                continue
+
+            # all good → create the transaction
+            t = Transaccion(
+                fecha=date.today(),
+                tipo=tipo,
+                monto=monto,
+                nota=nota,
+                cuenta_id=cuenta.id,
+                categoria_id=None,   # quick entry skips category; add later if you want
+            )
+            db.session.add(t)
+            creadas += 1
+
+        db.session.commit()
+        resultado = f"{creadas} saved, {len(fallidas)} failed."
+        return render_template("captura.html", resultado=resultado, fallidas=fallidas)
+
+    return render_template("captura.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

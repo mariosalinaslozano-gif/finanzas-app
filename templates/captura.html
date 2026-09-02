@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Quick entry</h2>
+<p>One per line: <code>tipo, codigo, monto, nota</code></p>
+<p><small>Codes: <code>deb-us</code>, <code>cred-us</code>, <code>deb-mx</code>, <code>cred-mx</code></small></p>
+<p><small>Example: <code>salida, cred-us, 80, dinner</code></small></p>
+
+<form method="POST">
+    <textarea name="lineas" rows="8"
+        placeholder="salida, cred-us, 80, dinner&#10;salida, deb-mx, 500, rent"></textarea>
+    <button type="submit">Save all</button>
+</form>
+
+{% if resultado %}
+<article>
+    <strong>Result:</strong> {{ resultado }}
+    {% if fallidas %}
+    <p>Lines that failed (fix and resubmit):</p>
+    <ul>
+        {% for linea in fallidas %}
+        <li><code>{{ linea }}</code></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</article>
+{% endif %}
+{% endblock %}
