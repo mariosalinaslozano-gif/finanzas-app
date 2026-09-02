@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Import transactions from CSV</h2>
+
+<p>The file should have columns: <code>fecha, monto, tipo, cuenta, categoria, nota</code></p>
+<p>Account names must match exactly, e.g. <code>BMO Debit</code>, <code>BMO Credit</code>, <code>NU Debit</code>, <code>NU Credit</code>.</p>
+
+<form method="POST" enctype="multipart/form-data">
+    <label>CSV file
+        <input type="file" name="archivo" accept=".csv" required>
+    </label>
+    <button type="submit">Import</button>
+</form>
+
+{% if resultado %}
+<article>
+    <strong>Result:</strong> {{ resultado }}
+</article>
+{% endif %}
+{% endblock %}

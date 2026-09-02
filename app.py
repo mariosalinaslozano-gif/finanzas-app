@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for
 from models import db, Cuenta, Categoria, Transaccion
 from datetime import datetime
 from sqlalchemy import func
+import csv
+import io
 
 
 app = Flask(__name__)
@@ -71,7 +73,7 @@ def lista_transacciones():
         consulta = consulta.filter(Transaccion.fecha >= datetime.strptime(desde, "%Y-%m-%d").date())
     if hasta:
         consulta = consulta.filter(Transaccion.fecha <= datetime.strptime(hasta, "%Y-%m-%d").date())
-        
+
     transacciones = consulta.order_by(Transaccion.fecha.desc()).all()
 
     cuentas = Cuenta.query.all()
@@ -148,6 +150,49 @@ def borrar_transaccion(id):
     db.session.delete(t)
     db.session.commit()
     return redirect(url_for("lista_transacciones"))
+
+@app.route("/importar", methods=["GET", "POST"])
+def importar():
+    if request.method == "POST":
+        archivo = request.files.get("archivo")
+        if not archivo:
+            return render_template("importar.html", resultado="No file selected.")
+
+        contenido = archivo.read().decode("utf-8-sig")
+        lector = csv.DictReader(io.StringIO(contenido))
+
+        creadas = 0
+        errores = 0
+
+        for fila in lector:
+            try:
+                # find the account and category by name
+                cuenta = Cuenta.query.filter_by(nombre=fila["cuenta"]).first()
+                categoria = Categoria.query.filter_by(nombre=fila["categoria"]).first()
+
+                if not cuenta:
+                    errores += 1
+                    continue   # skip this row, no matching account
+
+                t = Transaccion(
+                    fecha=datetime.strptime(fila["fecha"], "%Y-%m-%d").date(),
+                    monto=float(fila["monto"]),
+                    tipo=fila["tipo"],
+                    nota=fila.get("nota", ""),
+                    cuenta_id=cuenta.id,
+                    categoria_id=categoria.id if categoria else None,
+                )
+                db.session.add(t)
+                creadas += 1
+            except (ValueError, KeyError):
+                errores += 1
+                continue
+
+        db.session.commit()   # save all the new rows at once
+        return render_template("importar.html",
+                               resultado=f"{creadas} imported, {errores} skipped.")
+
+    return render_template("importar.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
