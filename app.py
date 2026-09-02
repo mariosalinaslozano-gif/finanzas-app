@@ -4,10 +4,16 @@ from datetime import datetime, date
 from sqlalchemy import func
 import csv
 import io
+import os
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///finanzas.db"
-db.init_app(app)
+# Use the cloud database if DATABASE_URL is set; otherwise use local SQLite.
+url = os.environ.get("DATABASE_URL", "sqlite:///finanzas.db")
+
+# Render gives URLs starting with "postgres://", but SQLAlchemy needs "postgresql://"
+if url.startswith("postgres://"):
+    url = url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = url
 
 CODIGOS_CUENTA = {
     "deb-us":  "Debito EE.UU.",
@@ -259,6 +265,9 @@ def captura():
         return render_template("captura.html", resultado=resultado, fallidas=fallidas)
 
     return render_template("captura.html")
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
