@@ -1,37 +1,39 @@
 {% extends "base.html" %}
 
 {% block contenido %}
+<details>
+  <summary>Filters</summary>
+  <!-- aquí va todo tu <form> de filtros -->
+    <form method="GET" action="/transacciones">
+        <div class="grid">
+            <select name="tipo">
+                <option value="">All types</option>
+                <option value="entrada">Income</option>
+                <option value="salida">Expense</option>
+                <option value="transferencia">Transfer</option>
+            </select>
 
-<form method="GET" action="/transacciones">
-    <div class="grid">
-        <select name="tipo">
-            <option value="">All types</option>
-            <option value="entrada">Income</option>
-            <option value="salida">Expense</option>
-            <option value="transferencia">Transfer</option>
-        </select>
+            <select name="cuenta_id">
+                <option value="">All accounts</option>
+                {% for c in cuentas %}
+                <option value="{{ c.id }}">{{ c.nombre }}</option>
+                {% endfor %}
+            </select>
 
-        <select name="cuenta_id">
-            <option value="">All accounts</option>
-            {% for c in cuentas %}
-            <option value="{{ c.id }}">{{ c.nombre }}</option>
-            {% endfor %}
-        </select>
+            <select name="categoria_id">
+                <option value="">All categories</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                {% endfor %}
+            </select>
 
-        <select name="categoria_id">
-            <option value="">All categories</option>
-            {% for cat in categorias %}
-            <option value="{{ cat.id }}">{{ cat.nombre }}</option>
-            {% endfor %}
-        </select>
+            <label>From <input type="date" name="desde"></label>
+            <label>To <input type="date" name="hasta"></label>
 
-        <label>From <input type="date" name="desde"></label>
-        <label>To <input type="date" name="hasta"></label>
-
-        <button type="submit">Filter</button>
-    </div>
-</form>
-
+            <button type="submit">Filter</button>
+        </div>
+    </form>
+</details>
 <h2>Transacciones</h2>
 
 <table class="tabla-transacciones">
