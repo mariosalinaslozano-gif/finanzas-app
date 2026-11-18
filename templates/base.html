@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mis Finanzas</title>
     <!-- Pico.css: estilo bonito sin escribir CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
     <main class="container">
@@ -13,11 +16,13 @@
             <p>Personal money tracker</p>
         </hgroup>
         <nav>
-            <a href="/captura">Quick entry</a> |
-            <a href="/">Dashboard</a> |
-            <a href="/transacciones">Transactions</a> |
-            <a href="/transacciones/nueva">Add transaction</a> |
-            <a href="/resumen">Summary</a>
+            <ul>
+                <li><a href="/captura">Quick entry</a></li>
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/transacciones">Transactions</a></li>
+                <li><a href="/transacciones/nueva">Add transaction</a></li>
+                <li><a href="/resumen">Summary</a></li>
+            </ul>
         </nav>
         <hr>
         {% block contenido %}{% endblock %}

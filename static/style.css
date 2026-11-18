@@ -1,0 +1,12 @@
+
+
+@media (max-width: 600px) {
+  /* aquí va una regla normal: selector { propiedad: valor; } */
+    nav ul {
+        flex-wrap: wrap;
+    }
+
+    nav li {
+        padding: 0.5rem;
+    }
+}
