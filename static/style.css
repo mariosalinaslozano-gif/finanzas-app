@@ -1,8 +1,19 @@
+hgroup {
+  text-align: center;
+}
+
+nav ul {
+  width: 100%;
+  justify-content: space-between;
+}
+
+
 @media (max-width: 600px) {
 
   /* ---- Menú ---- */
   nav ul {
     flex-wrap: wrap;
+    justify-content: center;   /* sobrescribe al space-between */
   }
 
   nav li {
