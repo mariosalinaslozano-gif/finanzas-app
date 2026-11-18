@@ -1,12 +1,30 @@
-
-
 @media (max-width: 600px) {
-  /* aquí va una regla normal: selector { propiedad: valor; } */
-    nav ul {
-        flex-wrap: wrap;
-    }
 
-    nav li {
-        padding: 0.5rem;
-    }
+  /* ---- Menú ---- */
+  nav ul {
+    flex-wrap: wrap;
+  }
+
+  nav li {
+    padding: 0.5rem;
+  }
+
+  /* ---- Tabla de transacciones como tarjetas ---- */
+  .tabla-transacciones thead {
+    display: none;
+  }
+
+  .tabla-transacciones tr,
+  .tabla-transacciones td {
+    display: block;
+  }
+
+  .tabla-transacciones tr {
+    margin-bottom: 1rem;
+  }
+
+  .tabla-transacciones td::before {
+    content: attr(data-label) ": ";
+    font-weight: bold;
+  }
 }

@@ -34,7 +34,7 @@
 
 <h2>Transacciones</h2>
 
-<table>
+<table class="tabla-transacciones">
     <thead>
         <tr>
             <th>Fecha</th><th>Tipo</th><th>Monto</th>
@@ -44,8 +44,9 @@
     <tbody>
         {% for t in transacciones %}
         <tr>
-            <td>{{ t.fecha }}</td>
-            <td>
+            <td data-label="Fecha">{{ t.fecha }}</td>
+            <td data-label="Tipo">{{ t.tipo }}</td>
+            <td data-label="Monto">
                 {% if t.tipo == "entrada" %}
                 <span style="color: green;">+{{ "%.2f"|format(t.monto) }}</span>
             {% elif t.tipo == "salida" %}
@@ -54,9 +55,9 @@
                 {{ "%.2f"|format(t.monto) }}
             {% endif %} 
             </td>
-            <td>{{ t.cuenta.nombre if t.cuenta else "-" }}</td>
-            <td>{{ t.categoria.nombre if t.categoria else "-" }}</td>
-            <td>{{ t.nota }}</td>
+            <td data-label="Cuenta">{{ t.cuenta.nombre if t.cuenta else "-" }}</td>
+            <td data-label="Categoría">{{ t.categoria.nombre if t.categoria else "-" }}</td>
+            <td data-label="Nota">{{ t.nota }}</td>
             <td>
                 <a href="/transacciones/{{ t.id }}/editar">Editar</a>
             </td>
