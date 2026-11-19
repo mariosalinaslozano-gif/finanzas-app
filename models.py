@@ -9,6 +9,10 @@ class Cuenta(db.Model):
     nombre = db.Column(db.String(80), nullable=False)      # ej. "Efectivo", "Banco"
     saldo_inicial = db.Column(db.Float, default=0.0)
     moneda = db.Column(db.String(10), default="MXN")
+    tipo = db.Column(db.String(20), nullable=False, default="debito")
+    dia_corte = db.Column(db.Integer, nullable=True) 
+    dia_pago = db.Column(db.Integer, nullable=True)
+    limite_credito = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
         return f"<Cuenta {self.nombre}>"
