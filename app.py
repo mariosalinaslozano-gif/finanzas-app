@@ -5,6 +5,9 @@ from sqlalchemy import func
 import csv
 import io
 import os
+from fechas import proxima_fecha
+from datetime import date
+
 
 # Use the cloud database if DATABASE_URL is set; otherwise use local SQLite.
 url = os.environ.get("DATABASE_URL", "sqlite:///finanzas.db")
@@ -42,9 +45,19 @@ def inicio():
     for cuenta, saldo in saldos:
         totales_por_moneda[cuenta.moneda] = totales_por_moneda.get(cuenta.moneda, 0) + saldo
 
+    fechas_credito = {}
+    for cuenta, saldo in saldos:
+        if cuenta.tipo == "credito" and cuenta.dia_corte and cuenta.dia_pago:
+            fechas_credito[cuenta.id] = {
+                "corte": proxima_fecha(cuenta.dia_corte),
+                "pago": proxima_fecha(cuenta.dia_pago),
+                "dias_para_pago": (proxima_fecha(cuenta.dia_pago) - date.today()).days,
+            }
+
     return render_template("dashboard.html",
                            saldos=saldos,
-                           totales=totales_por_moneda)
+                           totales=totales_por_moneda,
+                           fechas_credito=fechas_credito)
 
 
 @app.route("/resumen")
@@ -292,6 +305,49 @@ def editar_cuenta(id):
         return redirect(url_for("inicio"))
 
     return render_template("editar_cuenta.html", cuenta=cuenta)
+
+@app.route("/cuentas/nueva", methods=["GET", "POST"])
+def nueva_cuenta():
+
+    cuenta = Cuenta()
+
+    if request.method == "POST":
+            cuenta.nombre = request.form["nombre"]
+            cuenta.saldo_inicial = float(request.form["saldo_inicial"])
+            cuenta.moneda = request.form["moneda"]
+            cuenta.tipo = request.form["tipo"]
+            cuenta.dia_corte = int(request.form["dia_corte"]) if request.form["dia_corte"] else None
+            cuenta.dia_pago = int(request.form["dia_pago"]) if request.form["dia_pago"] else None
+            cuenta.limite_credito = float(request.form["limite_credito"]) if request.form["limite_credito"] else None
+
+            if cuenta.tipo == "debito":
+                cuenta.dia_corte = None
+                cuenta.dia_pago = None
+                cuenta.limite_credito = None
+
+            for dia in (cuenta.dia_corte, cuenta.dia_pago):
+                if dia is not None and (dia < 1 or dia > 31):
+                    return render_template("editar_cuenta.html", cuenta=cuenta, error="Payment and cut-off days must be between 1 and 31.")
+
+            db.session.add(cuenta)
+            db.session.commit()
+            return redirect(url_for("inicio"))
+    return render_template("editar_cuenta.html", cuenta=cuenta)
+
+@app.route("/cuentas/<int:id>/borrar", methods=["POST"])
+def borrar_cuenta(id):
+
+    cuenta = Cuenta.query.get_or_404(id)
+    cuenta_transacciones = Transaccion.query.filter_by(cuenta_id=cuenta.id).count()
+
+    if cuenta_transacciones > 0:
+        return render_template("editar_cuenta.html", cuenta=cuenta, error="Cannot delete account with transactions.")
+
+    
+    db.session.delete(cuenta)
+    db.session.commit()
+    return redirect(url_for("inicio"))
+
 
 with app.app_context():
     db.create_all()
