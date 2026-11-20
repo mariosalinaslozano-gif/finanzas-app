@@ -268,6 +268,31 @@ def captura():
 
     return render_template("captura.html")
 
+@app.route("/cuentas/<int:id>/editar", methods=["GET", "POST"])
+def editar_cuenta(id):
+    cuenta = Cuenta.query.get_or_404(id)
+
+    if request.method == "POST":
+        cuenta.nombre = request.form["nombre"]
+        cuenta.saldo_inicial = float(request.form["saldo_inicial"])
+        cuenta.moneda = request.form["moneda"]
+        cuenta.tipo = request.form["tipo"]
+        cuenta.dia_corte = int(request.form["dia_corte"]) if request.form["dia_corte"] else None
+        cuenta.dia_pago = int(request.form["dia_pago"]) if request.form["dia_pago"] else None
+        cuenta.limite_credito = float(request.form["limite_credito"]) if request.form["limite_credito"] else None
+
+        if cuenta.tipo == "debito":
+            cuenta.dia_corte = None
+            cuenta.dia_pago = None
+            cuenta.limite_credito = None
+
+        # aquí va la validación del punto 3 (el for)
+
+        db.session.commit()
+        return redirect(url_for("inicio"))
+
+    return render_template("editar_cuenta.html", cuenta=cuenta)
+
 with app.app_context():
     db.create_all()
 

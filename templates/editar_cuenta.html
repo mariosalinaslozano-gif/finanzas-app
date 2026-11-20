@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>Editar Cuenta</h2>{% if error %}<p>{{ error }}</p>{% endif %}
+    
+<form method="POST">
+    <label>Nombre <input type="text" name="nombre" value="{{ cuenta.nombre }}" required>
+
+    <label>Type
+    <select name="tipo">
+        <option value="debito" {% if cuenta.tipo == "debito" %}selected{% endif %}>Debit</option>
+        <option value="credito" {% if cuenta.tipo == "credito" %}selected{% endif %}>Credit</option>
+    </select></label>
+
+    <label>Cut-off day
+    <input type="number" name="dia_corte" min="1" max="31" value="{{ cuenta.dia_corte or '' }}">
+    </label>
+
+    <label>
+    Saldo Inicial <input required type="number" step="0.01" name="saldo_inicial" value="{{ cuenta.saldo_inicial }}">
+    </label>
+
+    <label>Currency
+    <select name="moneda" required>
+        <option value="USD" {% if cuenta.moneda == "USD" %}selected{% endif %}>USD</option>
+        <option value="MXN" {% if cuenta.moneda == "MXN" %}selected{% endif %}>MXN</option>
+    </select>
+    </label>
+
+    <label>Payment day
+    <input type="number" name="dia_pago" min="1" max="31" value="{{ cuenta.dia_pago or '' }}">
+    </label>
+
+    <label>Credit limit
+    <input type="number" step="0.01" name="limite_credito" value="{{ cuenta.limite_credito or '' }}">
+    </label>
+
+    <button type="submit">Guardar cambios</button>
+</form>
+
+{% endblock %}

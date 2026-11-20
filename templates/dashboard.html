@@ -6,7 +6,7 @@
 <h3>Balance by account</h3>
 <table>
     <thead>
-        <tr><th>Account</th><th>Currency</th><th>Balance</th></tr>
+        <tr><th>Account</th><th>Currency</th><th>Balance</th><th></th></tr>
     </thead>
     <tbody>
         {% for cuenta, saldo in saldos %}
@@ -14,6 +14,7 @@
             <td>{{ cuenta.nombre }}</td>
             <td>{{ cuenta.moneda }}</td>
             <td>{{ "%.2f"|format(saldo) }}</td>
+            <td><a href="{{ url_for('editar_cuenta', id=cuenta.id) }}">Edit</a></td>
         </tr>
         {% endfor %}
     </tbody>
